@@ -1,0 +1,335 @@
+
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Christmas Run Advent 🎄</title>
+
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;padding:20px;
+ font-family:Arial,sans-serif;
+ background:linear-gradient(150deg,#fff0f6,#ffe0ec);
+ color:#702044;
+}
+.container{max-width:520px;margin:auto}
+.hero{
+ text-align:center;padding:25px 12px;
+ background:white;border-radius:22px;
+ box-shadow:0 5px 20px #d77c9c30;
+}
+.hero h1{font-size:27px;color:#d63384}
+.login{
+ background:white;padding:17px;border-radius:16px;
+ margin:16px 0;display:grid;gap:10px;
+}
+input{
+ width:100%;padding:13px;
+ border:1px solid #e8b7cc;
+ border-radius:10px;font-size:15px;
+}
+button{
+ border:0;border-radius:10px;
+ padding:12px;font-weight:bold;cursor:pointer;
+}
+.primary{background:#e83e8c;color:white}
+.secondary{background:#fce0ec;color:#9d245a}
+#status{text-align:center;font-size:13px}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0}
+.stat{
+ background:white;padding:15px;border-radius:15px;
+ text-align:center;
+}
+.stat small{display:block;color:#98617b}
+.stat strong{font-size:25px;color:#d63384}
+.progress{
+ height:14px;background:#f4cddd;
+ border-radius:20px;overflow:hidden;margin:10px 0
+}
+#bar{
+ height:100%;width:0;background:#e83e8c;
+ transition:.3s
+}
+.calendar{
+ display:grid;grid-template-columns:repeat(4,1fr);
+ gap:9px;margin:15px 0
+}
+.day{
+ min-height:94px;background:white;
+ border:2px solid #f3c6d8;color:#7b3153;
+ display:flex;flex-direction:column;
+ align-items:center;justify-content:center;
+ gap:7px;border-radius:14px;
+}
+.day .number{font-size:13px}
+.day .km{font-size:21px}
+.day.done{
+ background:#f9c5dc;
+ border-color:#dc4387;color:#922354
+}
+.footer{
+ background:white;padding:20px;
+ border-radius:18px;text-align:center;margin-top:18px
+}
+.note{font-size:12px;color:#98617b;text-align:center}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<header class="hero">
+ <div style="font-size:35px">🎄🏃‍♀️🎁</div>
+ <h1>Christmas Run Advent</h1>
+ <p>1–24 grudnia 2026</p>
+ <p>24 dni • 100 kilometrów 💗</p>
+</header>
+
+<section class="login">
+ <h3 style="margin:0">Twoje konto</h3>
+ <input id="email" type="email" placeholder="Adres e-mail">
+ <input id="password" type="password" placeholder="Hasło (min. 6 znaków)">
+ <button class="primary" id="signup">Utwórz konto</button>
+ <button class="secondary" id="login">Zaloguj się</button>
+ <button class="secondary" id="logout" style="display:none">Wyloguj się</button>
+ <div id="status">Zaloguj się lub utwórz konto.</div>
+</section>
+
+<div class="stats">
+ <div class="stat">
+  <small>Przebiegnięte</small>
+  <strong id="total">0 km</strong>
+ </div>
+ <div class="stat">
+  <small>Ukończone treningi</small>
+  <strong id="count">0/24</strong>
+ </div>
+</div>
+
+<div style="display:flex;justify-content:space-between;font-size:14px;font-weight:bold">
+ <span>Twój postęp 💕</span>
+ <span id="percent">0%</span>
+</div>
+
+<div class="progress"><div id="bar"></div></div>
+<div id="remaining" style="text-align:center;font-size:13px">
+ Zostało 100 km do celu!
+</div>
+
+<h3>🎀 Twój kalendarz</h3>
+<p style="font-size:13px">Kliknij dzień, aby zaznaczyć trening.</p>
+
+<div class="calendar" id="calendar"></div>
+
+<div class="footer">
+ <div style="font-size:25px">🏆</div>
+ <h2>Cel: 100 km</h2>
+ <p id="message">Czekają na Ciebie 24 treningi!</p>
+ <div style="font-size:28px">❄️🎅🏻❄️</div>
+</div>
+
+<p class="note">
+ Postępy zapisują się na Twoim koncie online.
+</p>
+</div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<script>
+// WKLEJ SWOJĄ KONFIGURACJĘ FIREBASE
+  const firebaseConfig = {
+    apiKey: "AIzaSyBYUCkLckY1r9asyCwyvbSmXLjlMQfVkgM",
+    authDomain: "christmas-run-e43df.firebaseapp.com",
+    projectId: "christmas-run-e43df",
+    storageBucket: "christmas-run-e43df.firebasestorage.app",
+    messagingSenderId: "135046898265",
+    appId: "1:135046898265:web:98942ed4b327d5bb6f0748"
+  };
+
+firebase.initializeApp(firebaseConfig);
+
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+const distances = [
+ 3,2,3,3,3,3,2,4,2,4,4,5,
+ 5,2,5,3,5,6,6,7,3,7,3,10
+];
+
+let completed = [];
+let user = null;
+let busy = false;
+
+const $ = id => document.getElementById(id);
+
+function status(text){
+ $('status').textContent = text;
+}
+
+function render(){
+ const total = completed.reduce(
+  (sum,i)=>sum+distances[i],0
+ );
+
+ $('total').textContent = total+' km';
+ $('count').textContent = completed.length+'/24';
+ $('percent').textContent = total+'%';
+ $('bar').style.width = Math.min(total,100)+'%';
+
+ $('remaining').textContent = total>=100
+  ? 'Cel osiągnięty! Brawo! 🎉'
+  : 'Zostało '+(100-total)+' km do celu!';
+
+ $('message').textContent =
+  'Zaliczone '+completed.length+' z 24 treningów!';
+
+ document.querySelectorAll('.day').forEach((b,i)=>{
+  const done=completed.includes(i);
+  b.classList.toggle('done',done);
+  b.setAttribute('aria-pressed',String(done));
+  b.querySelector('.check').textContent=done?'✓':'○';
+ });
+}
+
+function makeCalendar(){
+ distances.forEach((km,i)=>{
+  const b=document.createElement('button');
+  b.className='day';
+  b.type='button';
+  b.setAttribute('aria-pressed','false');
+
+  const number=document.createElement('span');
+  number.className='number';
+  number.textContent='Dzień '+(i+1);
+
+  const distance=document.createElement('strong');
+  distance.className='km';
+  distance.textContent=km+' km';
+
+  const check=document.createElement('span');
+  check.className='check';
+  check.textContent='○';
+
+  b.append(number,distance,check);
+  b.addEventListener('click',()=>toggleDay(i));
+
+  $('calendar').appendChild(b);
+ }
+ );
+}
+
+async function loadProgress(){
+ const ref=db.collection('users').doc(user.uid);
+ const snap=await ref.get();
+
+ completed=snap.exists
+  ? snap.data().completed || []
+  : [];
+
+ completed=completed.filter(
+  i=>Number.isInteger(i)&&i>=0&&i<24
+ );
+
+ render();
+ status('Zalogowano! Postępy pobrane 💗');
+}
+
+async function saveProgress(){
+ await db.collection('users').doc(user.uid).set({
+  completed:completed,
+  updatedAt:firebase.firestore.FieldValue.serverTimestamp()
+ },{merge:true});
+
+ status('Postępy zapisane! ✓');
+}
+
+async function toggleDay(i){
+ if(!user){
+  status('Najpierw zaloguj się na konto!');
+  return;
+ }
+
+ if(busy)return;
+ busy=true;
+
+ const previous=[...completed];
+
+ completed=completed.includes(i)
+  ? completed.filter(x=>x!==i)
+  : [...completed,i];
+
+ render();
+
+ try{
+  await saveProgress();
+ }catch(e){
+  completed=previous;
+  render();
+  status('Błąd zapisu. Sprawdź internet i spróbuj ponownie.');
+ }
+
+ busy=false;
+}
+
+$('signup').onclick=async()=>{
+ try{
+  const email=$('email').value.trim();
+  const password=$('password').value;
+
+  if(!email||password.length<6){
+   status('Wpisz e-mail i hasło (minimum 6 znaków).');
+   return;
+  }
+
+  await auth.createUserWithEmailAndPassword(email,password);
+  status('Konto utworzone! 💗');
+ }catch(e){
+  status('Błąd: '+e.message);
+ }
+};
+
+$('login').onclick=async()=>{
+ try{
+  const email=$('email').value.trim();
+  const password=$('password').value;
+
+  await auth.signInWithEmailAndPassword(email,password);
+ }catch(e){
+  status('Błąd logowania: '+e.message);
+ }
+};
+
+$('logout').onclick=async()=>{
+ await auth.signOut();
+};
+
+auth.onAuthStateChanged(async currentUser=>{
+ user=currentUser;
+
+ if(user){
+  $('logout').style.display='block';
+
+  try{
+   await loadProgress();
+  }catch(e){
+   status('Nie udało się pobrać postępów.');
+  }
+ }else{
+  completed=[];
+  render();
+  $('logout').style.display='none';
+  status('Zaloguj się lub utwórz konto.');
+ }
+});
+
+makeCalendar();
+render();
+</script>
+
+</body>
+</html>
