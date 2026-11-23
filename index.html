@@ -10,6 +10,20 @@
 <title>Christmas Run Advent ⚡</title>
 
 <style>
+html{
+ background:#05050e;
+ min-height:100%;
+}
+.top-cover{
+ position:fixed;
+ top:0;
+ left:0;
+ right:0;
+ height:env(safe-area-inset-top, 44px);
+ background:#05050e;
+ z-index:9999;
+ pointer-events:none;
+}
 :root{
  --bg-dark:#070712;
  --bg-card:#0e0d22;
@@ -206,6 +220,7 @@ h3{color:var(--violet-bright);margin-bottom:4px}
 </head>
 
 <body>
+<div class="top-cover" aria-hidden="true"></div>
 <div class="container">
 
 <header class="hero">
