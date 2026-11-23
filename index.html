@@ -2,36 +2,15 @@
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#070712">
+<link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0%25' stop-color='%234c1d95'/><stop offset='55%25' stop-color='%23a855f7'/><stop offset='100%25' stop-color='%2338bdf8'/></linearGradient></defs><rect width='180' height='180' rx='40' fill='url(%23g)'/><text x='90' y='115' text-anchor='middle' font-size='84' font-family='Arial,sans-serif'>⚡</text></svg>">
 <title>Christmas Run Advent ⚡</title>
 
 <style>
-html{
- background:
-  radial-gradient(circle at 15% 0%, rgba(168,85,247,.22), transparent 45%),
-  radial-gradient(circle at 85% 15%, rgba(56,189,248,.18), transparent 45%),
-  linear-gradient(160deg,#05050e,#090818 55%,#0b0a1f);
- background-attachment:fixed;
- min-height:100%;
-}
-.top-cover{
- position:fixed;
- top:0;
- left:0;
- right:0;
- height:env(safe-area-inset-top, 44px);
- background:
-  radial-gradient(circle at 15% 0%, rgba(168,85,247,.22), transparent 45%),
-  radial-gradient(circle at 85% 15%, rgba(56,189,248,.18), transparent 45%),
-  linear-gradient(160deg,#05050e,#090818 55%,#0b0a1f);
- background-size:100vw 100vh;
- z-index:9999;
- pointer-events:none;
-}
 :root{
  --bg-dark:#070712;
  --bg-card:#0e0d22;
@@ -44,17 +23,40 @@ html{
  --violet-bright:#c084fc;
  --blue-neon:#38bdf8;
  --blue-deep:#1d4ed8;
+ --page-bg:
+  radial-gradient(circle at 15% 0%, rgba(168,85,247,.26), transparent 45%),
+  radial-gradient(circle at 85% 15%, rgba(56,189,248,.20), transparent 45%),
+  linear-gradient(160deg,#05050e,#090818 55%,#0b0a1f);
 }
 *{box-sizing:border-box}
+html{
+ background-color:#05050e;
+ background-image:var(--page-bg);
+ background-attachment:fixed;
+ min-height:100%;
+}
 body{
- margin:0;padding:20px;
+ margin:0;
+ padding:calc(20px + env(safe-area-inset-top, 0px)) 20px calc(24px + env(safe-area-inset-bottom, 0px));
  font-family:Arial,sans-serif;
- background:
-  radial-gradient(circle at 15% 0%, rgba(168,85,247,.22), transparent 45%),
-  radial-gradient(circle at 85% 15%, rgba(56,189,248,.18), transparent 45%),
-  linear-gradient(160deg,#05050e,#090818 55%,#0b0a1f);
+ background-color:#05050e;
+ background-image:var(--page-bg);
+ background-attachment:fixed;
  color:var(--text);
  min-height:100vh;
+}
+.top-cover{
+ position:fixed;
+ top:0;
+ left:0;
+ right:0;
+ height:env(safe-area-inset-top, 44px);
+ background-color:#05050e;
+ background-image:var(--page-bg);
+ background-size:100vw 100vh;
+ background-position:top center;
+ z-index:9999;
+ pointer-events:none;
 }
 .container{max-width:520px;margin:auto}
 .hero{
@@ -142,14 +144,13 @@ button:active{transform:scale(.99)}
  color:var(--blue-neon);
  text-shadow:0 0 10px rgba(56,189,248,.5);
 }
-#status{
- text-align:center;font-size:13px;
+#statusGuest,#statusLogged{
+ font-size:13px;
  color:var(--blue-neon);
  min-height:18px;
 }
-.logged-bar #status{
- text-align:left;
-}
+#statusGuest{text-align:center}
+#statusLogged{text-align:left}
 .stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0}
 .stat{
  background:var(--bg-card);
