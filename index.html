@@ -1,79 +1,176 @@
-
 <!DOCTYPE html>
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Christmas Run Advent 🎄</title>
+<title>Christmas Run Advent ⚡</title>
 
 <style>
+:root{
+ --bg-dark:#070712;
+ --bg-card:#0e0d22;
+ --bg-card-2:#141230;
+ --border:#2b235a;
+ --text:#eef2ff;
+ --muted:#8f96c4;
+ --violet-dark:#4c1d95;
+ --violet-neon:#a855f7;
+ --violet-bright:#c084fc;
+ --blue-neon:#38bdf8;
+ --blue-deep:#1d4ed8;
+}
 *{box-sizing:border-box}
 body{
  margin:0;padding:20px;
  font-family:Arial,sans-serif;
- background:linear-gradient(150deg,#fff0f6,#ffe0ec);
- color:#702044;
+ background:
+  radial-gradient(circle at 15% 0%, rgba(168,85,247,.22), transparent 45%),
+  radial-gradient(circle at 85% 15%, rgba(56,189,248,.18), transparent 45%),
+  linear-gradient(160deg,#05050e,#090818 55%,#0b0a1f);
+ color:var(--text);
+ min-height:100vh;
 }
 .container{max-width:520px;margin:auto}
 .hero{
- text-align:center;padding:25px 12px;
- background:white;border-radius:22px;
- box-shadow:0 5px 20px #d77c9c30;
+ text-align:center;padding:25px 14px;
+ background:linear-gradient(180deg,#12102c,#0c0b1e);
+ border:1px solid rgba(168,85,247,.45);
+ border-radius:20px;
+ box-shadow:0 0 25px rgba(168,85,247,.2),0 0 40px rgba(56,189,248,.1);
 }
-.hero h1{font-size:27px;color:#d63384}
+.hero h1{
+ margin:8px 0 6px;
+ font-size:27px;
+ letter-spacing:.5px;
+ color:var(--violet-bright);
+ text-shadow:0 0 14px rgba(192,132,252,.55);
+}
+.hero p{margin:4px 0;color:var(--muted)}
 .login{
- background:white;padding:17px;border-radius:16px;
+ background:var(--bg-card);
+ border:1px solid var(--border);
+ padding:17px;border-radius:16px;
  margin:16px 0;display:grid;gap:10px;
+ box-shadow:0 8px 24px rgba(0,0,0,.45);
 }
 input{
  width:100%;padding:13px;
- border:1px solid #e8b7cc;
+ background:#070713;
+ color:var(--text);
+ border:1px solid #352b6e;
  border-radius:10px;font-size:15px;
+ outline:none;
+ transition:.2s;
+}
+input::placeholder{color:#6d74a3}
+input:focus{
+ border-color:var(--blue-neon);
+ box-shadow:0 0 12px rgba(56,189,248,.35);
 }
 button{
  border:0;border-radius:10px;
  padding:12px;font-weight:bold;cursor:pointer;
+ transition:.2s;
 }
-.primary{background:#e83e8c;color:white}
-.secondary{background:#fce0ec;color:#9d245a}
-#status{text-align:center;font-size:13px}
+button:active{transform:scale(.99)}
+.primary{
+ background:linear-gradient(90deg,var(--violet-dark),var(--violet-neon),var(--blue-neon));
+ color:#ffffff;
+ box-shadow:0 0 16px rgba(168,85,247,.45);
+}
+.primary:hover{
+ filter:brightness(1.12);
+ box-shadow:0 0 22px rgba(56,189,248,.55);
+}
+.secondary{
+ background:#151332;
+ color:var(--violet-bright);
+ border:1px solid #3b2f7a;
+}
+.secondary:hover{
+ border-color:var(--blue-neon);
+ color:#ffffff;
+ box-shadow:0 0 12px rgba(56,189,248,.25);
+}
+#status{
+ text-align:center;font-size:13px;
+ color:var(--blue-neon);
+ min-height:18px;
+}
 .stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0}
 .stat{
- background:white;padding:15px;border-radius:15px;
+ background:var(--bg-card);
+ border:1px solid var(--border);
+ padding:15px;border-radius:15px;
  text-align:center;
+ box-shadow:0 6px 20px rgba(0,0,0,.35);
 }
-.stat small{display:block;color:#98617b}
-.stat strong{font-size:25px;color:#d63384}
+.stat small{display:block;color:var(--muted)}
+.stat strong{
+ font-size:25px;
+ color:var(--blue-neon);
+ text-shadow:0 0 12px rgba(56,189,248,.45);
+}
 .progress{
- height:14px;background:#f4cddd;
+ height:14px;
+ background:#121029;
+ border:1px solid #2e2661;
  border-radius:20px;overflow:hidden;margin:10px 0
 }
 #bar{
- height:100%;width:0;background:#e83e8c;
+ height:100%;width:0;
+ background:linear-gradient(90deg,var(--violet-neon),var(--blue-neon));
+ box-shadow:0 0 14px rgba(56,189,248,.65);
  transition:.3s
 }
+#remaining{color:var(--muted)}
+h3{color:var(--violet-bright);margin-bottom:4px}
 .calendar{
  display:grid;grid-template-columns:repeat(4,1fr);
  gap:9px;margin:15px 0
 }
 .day{
- min-height:94px;background:white;
- border:2px solid #f3c6d8;color:#7b3153;
+ min-height:94px;
+ background:var(--bg-card-2);
+ border:1.5px solid #2c245e;
+ color:var(--text);
  display:flex;flex-direction:column;
  align-items:center;justify-content:center;
  gap:7px;border-radius:14px;
 }
-.day .number{font-size:13px}
-.day .km{font-size:21px}
+.day:hover{
+ border-color:var(--blue-neon);
+ box-shadow:0 0 14px rgba(56,189,248,.28);
+}
+.day .number{font-size:12px;color:var(--muted)}
+.day .km{font-size:20px;color:var(--violet-bright)}
+.day .check{font-size:13px;color:var(--muted)}
 .day.done{
- background:#f9c5dc;
- border-color:#dc4387;color:#922354
+ background:linear-gradient(160deg,rgba(76,29,149,.75),rgba(29,78,216,.55));
+ border-color:var(--blue-neon);
+ color:#ffffff;
+ box-shadow:0 0 16px rgba(168,85,247,.45),inset 0 0 10px rgba(56,189,248,.35);
 }
+.day.done .number{color:#e0f2fe}
+.day.done .km{
+ color:#ffffff;
+ text-shadow:0 0 10px rgba(56,189,248,.8);
+}
+.day.done .check{color:var(--blue-neon)}
 .footer{
- background:white;padding:20px;
- border-radius:18px;text-align:center;margin-top:18px
+ background:linear-gradient(180deg,#12102c,#0c0b1e);
+ border:1px solid rgba(56,189,248,.35);
+ padding:20px;
+ border-radius:18px;text-align:center;margin-top:18px;
+ box-shadow:0 0 24px rgba(56,189,248,.12);
 }
-.note{font-size:12px;color:#98617b;text-align:center}
+.footer h2{
+ margin:8px 0;
+ color:var(--violet-bright);
+ text-shadow:0 0 12px rgba(192,132,252,.45);
+}
+.footer p{color:var(--muted)}
+.note{font-size:12px;color:var(--muted);text-align:center}
 </style>
 </head>
 
@@ -81,10 +178,10 @@ button{
 <div class="container">
 
 <header class="hero">
- <div style="font-size:35px">🎄🏃‍♀️🎁</div>
+ <div style="font-size:35px">🎄🏃‍♂️⚡</div>
  <h1>Christmas Run Advent</h1>
  <p>1–24 grudnia 2026</p>
- <p>24 dni • 100 kilometrów 💗</p>
+ <p>24 dni • 100 kilometrów 🔥</p>
 </header>
 
 <section class="login">
@@ -109,8 +206,8 @@ button{
 </div>
 
 <div style="display:flex;justify-content:space-between;font-size:14px;font-weight:bold">
- <span>Twój postęp 💕</span>
- <span id="percent">0%</span>
+ <span>Twój postęp ⚡</span>
+ <span id="percent" style="color:#38bdf8">0%</span>
 </div>
 
 <div class="progress"><div id="bar"></div></div>
@@ -118,8 +215,8 @@ button{
  Zostało 100 km do celu!
 </div>
 
-<h3>🎀 Twój kalendarz</h3>
-<p style="font-size:13px">Kliknij dzień, aby zaznaczyć trening.</p>
+<h3>⚡ Twój kalendarz</h3>
+<p style="font-size:13px;color:#8f96c4">Kliknij dzień, aby zaznaczyć trening.</p>
 
 <div class="calendar" id="calendar"></div>
 
@@ -127,7 +224,7 @@ button{
  <div style="font-size:25px">🏆</div>
  <h2>Cel: 100 km</h2>
  <p id="message">Czekają na Ciebie 24 treningi!</p>
- <div style="font-size:28px">❄️🎅🏻❄️</div>
+ <div style="font-size:28px">❄️⚡❄️</div>
 </div>
 
 <p class="note">
@@ -141,15 +238,15 @@ button{
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
 <script>
-// WKLEJ SWOJĄ KONFIGURACJĘ FIREBASE
-  const firebaseConfig = {
-    apiKey: "AIzaSyBYUCkLckY1r9asyCwyvbSmXLjlMQfVkgM",
-    authDomain: "christmas-run-e43df.firebaseapp.com",
-    projectId: "christmas-run-e43df",
-    storageBucket: "christmas-run-e43df.firebasestorage.app",
-    messagingSenderId: "135046898265",
-    appId: "1:135046898265:web:98942ed4b327d5bb6f0748"
-  };
+// KONFIGURACJA FIREBASE
+const firebaseConfig = {
+ apiKey: "AIzaSyBYUCkLckY1r9asyCwyvbSmXLjlMQfVkgM",
+ authDomain: "christmas-run-e43df.firebaseapp.com",
+ projectId: "christmas-run-e43df",
+ storageBucket: "christmas-run-e43df.firebasestorage.app",
+ messagingSenderId: "135046898265",
+ appId: "1:135046898265:web:98942ed4b327d5bb6f0748"
+};
 
 firebase.initializeApp(firebaseConfig);
 
@@ -182,7 +279,7 @@ function render(){
  $('bar').style.width = Math.min(total,100)+'%';
 
  $('remaining').textContent = total>=100
-  ? 'Cel osiągnięty! Brawo! 🎉'
+  ? 'Cel osiągnięty! Brawo! 🏆'
   : 'Zostało '+(100-total)+' km do celu!';
 
  $('message').textContent =
@@ -236,7 +333,7 @@ async function loadProgress(){
  );
 
  render();
- status('Zalogowano! Postępy pobrane 💗');
+ status('Zalogowano! Postępy pobrane ⚡');
 }
 
 async function saveProgress(){
@@ -287,7 +384,7 @@ $('signup').onclick=async()=>{
   }
 
   await auth.createUserWithEmailAndPassword(email,password);
-  status('Konto utworzone! 💗');
+  status('Konto utworzone! ⚡');
  }catch(e){
   status('Błąd: '+e.message);
  }
