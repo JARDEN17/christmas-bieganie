@@ -53,6 +53,16 @@ body{
  margin:16px 0;display:grid;gap:10px;
  box-shadow:0 8px 24px rgba(0,0,0,.45);
 }
+.auth-fields{
+ display:grid;
+ gap:10px;
+}
+.logged-bar{
+ display:none;
+ align-items:center;
+ justify-content:space-between;
+ gap:12px;
+}
 input{
  width:100%;padding:13px;
  background:#070713;
@@ -92,10 +102,27 @@ button:active{transform:scale(.99)}
  color:#ffffff;
  box-shadow:0 0 12px rgba(56,189,248,.25);
 }
+.logout-link{
+ background:transparent;
+ border:0;
+ padding:4px 6px;
+ color:var(--violet-bright);
+ font-weight:bold;
+ font-size:14px;
+ cursor:pointer;
+ text-decoration:underline;
+}
+.logout-link:hover{
+ color:var(--blue-neon);
+ text-shadow:0 0 10px rgba(56,189,248,.5);
+}
 #status{
  text-align:center;font-size:13px;
  color:var(--blue-neon);
  min-height:18px;
+}
+.logged-bar #status{
+ text-align:left;
 }
 .stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0}
 .stat{
@@ -185,13 +212,19 @@ h3{color:var(--violet-bright);margin-bottom:4px}
 </header>
 
 <section class="login">
- <h3 style="margin:0">Twoje konto</h3>
- <input id="email" type="email" placeholder="Adres e-mail">
- <input id="password" type="password" placeholder="Hasło (min. 6 znaków)">
- <button class="primary" id="signup">Utwórz konto</button>
- <button class="secondary" id="login">Zaloguj się</button>
- <button class="secondary" id="logout" style="display:none">Wyloguj się</button>
- <div id="status">Zaloguj się lub utwórz konto.</div>
+ <div class="auth-fields" id="authFields">
+  <h3 style="margin:0">Twoje konto</h3>
+  <input id="email" type="email" placeholder="Adres e-mail">
+  <input id="password" type="password" placeholder="Hasło (min. 6 znaków)">
+  <button class="primary" id="signup" type="button">Utwórz konto</button>
+  <button class="secondary" id="login" type="button">Zaloguj się</button>
+  <div id="statusGuest">Zaloguj się lub utwórz konto.</div>
+ </div>
+
+ <div class="logged-bar" id="loggedBar">
+  <div id="statusLogged">Zalogowano ⚡</div>
+  <button class="logout-link" id="logout" type="button">Wyloguj</button>
+ </div>
 </section>
 
 <div class="stats">
@@ -238,7 +271,6 @@ h3{color:var(--violet-bright);margin-bottom:4px}
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
 <script>
-// KONFIGURACJA FIREBASE
 const firebaseConfig = {
  apiKey: "AIzaSyBYUCkLckY1r9asyCwyvbSmXLjlMQfVkgM",
  authDomain: "christmas-run-e43df.firebaseapp.com",
@@ -251,6 +283,8 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 
 const auth = firebase.auth();
+auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+
 const db = firebase.firestore();
 
 const distances = [
@@ -264,8 +298,22 @@ let busy = false;
 
 const $ = id => document.getElementById(id);
 
-function status(text){
- $('status').textContent = text;
+function setStatus(text){
+ if(user){
+  $('statusLogged').textContent = text;
+ }else{
+  $('statusGuest').textContent = text;
+ }
+}
+
+function updateAuthUI(){
+ if(user){
+  $('authFields').style.display = 'none';
+  $('loggedBar').style.display = 'flex';
+ }else{
+  $('authFields').style.display = 'grid';
+  $('loggedBar').style.display = 'none';
+ }
 }
 
 function render(){
@@ -333,7 +381,7 @@ async function loadProgress(){
  );
 
  render();
- status('Zalogowano! Postępy pobrane ⚡');
+ setStatus('Zalogowano ⚡ Postępy pobrane');
 }
 
 async function saveProgress(){
@@ -342,12 +390,12 @@ async function saveProgress(){
   updatedAt:firebase.firestore.FieldValue.serverTimestamp()
  },{merge:true});
 
- status('Postępy zapisane! ✓');
+ setStatus('Postępy zapisane! ✓');
 }
 
 async function toggleDay(i){
  if(!user){
-  status('Najpierw zaloguj się na konto!');
+  setStatus('Najpierw zaloguj się na konto!');
   return;
  }
 
@@ -367,7 +415,7 @@ async function toggleDay(i){
  }catch(e){
   completed=previous;
   render();
-  status('Błąd zapisu. Sprawdź internet i spróbuj ponownie.');
+  setStatus('Błąd zapisu. Sprawdź internet i spróbuj ponownie.');
  }
 
  busy=false;
@@ -379,14 +427,13 @@ $('signup').onclick=async()=>{
   const password=$('password').value;
 
   if(!email||password.length<6){
-   status('Wpisz e-mail i hasło (minimum 6 znaków).');
+   setStatus('Wpisz e-mail i hasło (minimum 6 znaków).');
    return;
   }
 
   await auth.createUserWithEmailAndPassword(email,password);
-  status('Konto utworzone! ⚡');
  }catch(e){
-  status('Błąd: '+e.message);
+  setStatus('Błąd: '+e.message);
  }
 };
 
@@ -397,7 +444,7 @@ $('login').onclick=async()=>{
 
   await auth.signInWithEmailAndPassword(email,password);
  }catch(e){
-  status('Błąd logowania: '+e.message);
+  setStatus('Błąd logowania: '+e.message);
  }
 };
 
@@ -407,20 +454,18 @@ $('logout').onclick=async()=>{
 
 auth.onAuthStateChanged(async currentUser=>{
  user=currentUser;
+ updateAuthUI();
 
  if(user){
-  $('logout').style.display='block';
-
   try{
    await loadProgress();
   }catch(e){
-   status('Nie udało się pobrać postępów.');
+   setStatus('Nie udało się pobrać postępów.');
   }
  }else{
   completed=[];
   render();
-  $('logout').style.display='none';
-  status('Zaloguj się lub utwórz konto.');
+  setStatus('Zaloguj się lub utwórz konto.');
  }
 });
 
